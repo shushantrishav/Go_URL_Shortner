@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # redis:
+    # We are now connecting to an external Upstash Redis, so we don't need to run a local Redis service
+    # However, I'm keeping this service commented out in case you ever want to switch back to local Redis.
+    # If you only use Upstash, you can completely remove this 'redis' service block.
+    # image: redis:7.0-alpine
+    # container_name: link_shortener_redis
+    # command: redis-server --requirepass ${REDIS_PASSWORD}
+    # ports:
+    #   - "6379:6379"
+    # volumes:
+    #   - redis_data:/data
+
+  app:
+    build: .
+    container_name: link_shortener_app
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "${HTTPS_PORT}:${HTTPS_PORT}"
+    # depends_on:
+    #   - redis # Removed dependency on local redis, as we use Upstash
+    environment:
+      # Explicitly pass these for clarity, even if also in .env
+      - REDIS_ADDR=${REDIS_ADDR}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=${REDIS_DB}
+      - HTTP_PORT=${HTTP_PORT}
+      - HTTPS_PORT=${HTTPS_PORT}
+      - TLS_CERT_PATH=${TLS_CERT_PATH}
+      - TLS_KEY_PATH=${TLS_KEY_PATH}
+    env_file:
+      - ./.env # This ensures all variables from .env are available
+
+volumes:
+  redis_data: # Keep this volume definition, though it might not be used if local redis is commented out.

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CutLink API Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color-light: #f8faff;
+            /* Lighter blue-ish white */
+            --bg-color-dark: #2c2f33;
+            --text-color-light: #333;
+            --text-color-dark: #e0e0e0;
+            --container-bg-light: #ffffff;
+            --container-bg-dark: #36393f;
+            --primary-color: #007bff;
+            /* Blue */
+            --secondary-color: #28a745;
+            /* Green */
+            --tertiary-color: #dc3545;
+            /* Red */
+            --code-bg-light: #e9ecef;
+            /* Light gray */
+            --code-bg-dark: #23272a;
+            --border-color-light: #dee2e6;
+            --border-color-dark: #4a4d52;
+            --box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --box-shadow-dark: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --header-color-light: #0056b3;
+            --header-color-dark: #8ab4f8;
+            /* Lighter blue for dark mode */
+        }
+
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--bg-color-light), #e0e7f2);
+            /* Subtle gradient */
+            color: var(--text-color-light);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, var(--bg-color-dark), #1a1c1f);
+            color: var(--text-color-dark);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            /* Slightly wider for better readability */
+            margin: auto;
+            background: var(--container-bg-light);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow-light);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+            /* Include padding in width */
+        }
+
+        body.dark-mode .container {
+            background: var(--container-bg-dark);
+            box-shadow: var(--box-shadow-dark);
+        }
+
+        h1,
+        h2 {
+            color: var(--header-color-light);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        body.dark-mode h1,
+        body.dark-mode h2 {
+            color: var(--header-color-dark);
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        body.dark-mode h3 {
+            color: var(--header-color-dark);
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        pre {
+            background-color: var(--code-bg-light);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95em;
+            line-height: 1.4;
+            margin-top: 10px;
+            border: 1px solid var(--border-color-light);
+            white-space: pre-wrap;
+            /* Wrap long lines */
+            word-wrap: break-word;
+            /* Break words if too long */
+        }
+
+        body.dark-mode pre {
+            background-color: var(--code-bg-dark);
+            border: 1px solid var(--border-color-dark);
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #d14;
+            /* Default for inline code */
+            background-color: rgba(27, 31, 35, 0.05);
+            /* Light background for inline code */
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        body.dark-mode code {
+            color: #b39ddb;
+            /* Purple for dark mode inline code */
+            background-color: rgba(144, 202, 249, 0.1);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+
+        ul li {
+            margin-bottom: 8px;
+        }
+
+        .endpoint {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--border-color-light);
+            /* Dotted border */
+        }
+
+        body.dark-mode .endpoint {
+            border-bottom: 1px dashed var(--border-color-dark);
+        }
+
+        .endpoint:last-child {
+            border-bottom: none;
+            /* No border for the last endpoint */
+        }
+
+        .method {
+            font-weight: bold;
+            display: inline-block;
+            /* Allow padding */
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-right: 8px;
+            color: #fff;
+        }
+
+        .method.get {
+            background-color: var(--secondary-color);
+            /* Green */
+        }
+
+        .method.post {
+            background-color: var(--primary-color);
+            /* Blue */
+        }
+
+        .method.put {
+            background-color: #ffc107;
+            /* Yellow */
+        }
+
+        .method.delete {
+            background-color: var(--tertiary-color);
+            /* Red */
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #888;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color-light);
+        }
+
+        body.dark-mode .footer {
+            color: #b0b0b0;
+            border-top: 1px solid var(--border-color-dark);
+        }
+
+        /* Dark Mode Toggle Switch */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            position: fixed;
+            /* Fixed position */
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            /* Ensure it's above other content */
+            background-color: var(--container-bg-light);
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow-light);
+        }
+
+        body.dark-mode .theme-switch-wrapper {
+            background-color: var(--container-bg-dark);
+            box-shadow: var(--box-shadow-dark);
+        }
+
+        .theme-switch {
+            display: inline-block;
+            height: 28px;
+            position: relative;
+            width: 50px;
+        }
+
+        .theme-switch input {
+            display: none;
+        }
+
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+        }
+
+        .slider:before {
+            background-color: #fff;
+            bottom: 4px;
+            content: "";
+            height: 20px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 20px;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .theme-switch-wrapper em {
+            margin-left: 10px;
+            font-style: normal;
+            font-size: 0.9em;
+            color: var(--text-color-light);
+        }
+
+        body.dark-mode .theme-switch-wrapper em {
+            color: var(--text-color-dark);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                padding: 25px;
+                border-radius: 8px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                text-align: center;
+            }
+
+            h2 {
+                font-size: 1.5em;
+                text-align: center;
+                margin-top: 25px;
+            }
+
+            h3 {
+                font-size: 1.2em;
+            }
+
+            pre {
+                padding: 12px;
+                font-size: 0.9em;
+            }
+
+            .method {
+                padding: 2px 6px;
+                font-size: 0.8em;
+            }
+
+            .theme-switch-wrapper {
+                position: static;
+                /* Stack on smaller screens */
+                margin: 0 auto 20px auto;
+                /* Center it */
+                width: fit-content;
+                box-shadow: none;
+                /* Remove shadow when stacked */
+                background-color: transparent;
+                /* Transparent background */
+                padding: 0;
+            }
+
+            body.dark-mode .theme-switch-wrapper {
+                background-color: transparent;
+            }
+
+            .theme-switch-wrapper em {
+                display: none;
+                /* Hide text on small screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.6em;
+            }
+
+            h2 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider round"></div>
+        </label>
+        <em>Enable Dark Mode!</em>
+    </div>
+
+    <div class="container">
+        <h1>Welcome to CutLink API!</h1>
+        <p>This API allows you to shorten long URLs and redirect users from a short slug to the original URL. Below
+            you'll find details on how to interact with the available endpoints.</p>
+
+        <h2>API Endpoints:</h2>
+
+        <div class="endpoint">
+            <h3>1. Shorten a URL</h3>
+            <p><span class="method post">POST</span> <code>/shorten</code></p>
+            <p><strong>Description:</strong> Creates a new short URL for the provided long URL. You can optionally
+                provide a custom slug.</p>
+            <p><strong>Request Body (JSON):</strong></p>
+            <pre><code>{
+    "long_url": "https://www.example.com/very/long/url/path",
+    "custom_slug": "my-short-link" <span style="color: var(--primary-color);">// Optional: provide a desired custom slug</span>
+}</code></pre>
+            <p><strong>Response Body (JSON - Success 200 OK):</strong></p>
+            <pre><code>{
+    "short_url": "YOUR_BASE_URL/s/generated_slug_or_custom_slug"
+}</code></pre>
+            <p><strong>Error Response (JSON):</strong></p>
+            <ul>
+                <li><strong>400 Bad Request:</strong> Invalid input (e.g., malformed URL, slug too short/long, slug
+                    already exists).</li>
+                <li><strong>429 Too Many Requests:</strong> Rate limit exceeded.</li>
+                <li><strong>500 Internal Server Error:</strong> Server-side issue.</li>
+            </ul>
+            <pre><code>{
+    "error": "Error message details, e.g., Invalid URL provided"
+}</code></pre>
+        </div>
+
+        <div class="endpoint">
+            <h3>2. Redirect Short URL</h3>
+            <p><span class="method get">GET</span> <code>/s/{short_slug}</code></p>
+            <p><strong>Description:</strong> Redirects to the original long URL associated with the given short slug.
+            </p>
+            <p><strong>Response:</strong> 302 Found (Redirects to the original URL).</p>
+            <p><strong>Error Response (JSON - 404 Not Found):</strong></p>
+            <pre><code>{
+    "error": "Link not found or expired"
+}</code></pre>
+        </div>
+
+        <div class="endpoint">
+            <h3>3. Health Check</h3>
+            <p><span class="method get">GET</span> <code>/health</code></p>
+            <p><strong>Description:</strong> Checks the operational status of the API server. Useful for monitoring.</p>
+            <p><strong>Response:</strong> Plain text "OK" (200 OK).</p>
+            <pre><code>OK</code></pre>
+        </div>
+
+        <div class="footer">
+            <p>Developed with ❤️ by Shushant Rishav</p>
+            <p>&copy; 2025 CutLink. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const checkbox = document.getElementById('checkbox');
+        const body = document.body;
+
+        // Check for saved theme preference
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            body.classList.add(currentTheme);
+            if (currentTheme === 'dark-mode') {
+                checkbox.checked = true;
+            }
+        }
+
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light-mode');
+            }
+        });
+    </script>
+</body>
+
+</html>
