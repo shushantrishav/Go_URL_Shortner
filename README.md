@@ -308,6 +308,12 @@ This application is engineered for straightforward deployment on Render, or comp
 * **Logging Practices:** Application logs are directed to `stdout` and `stderr` streams, which are subsequently captured by Docker and Render's respective logging infrastructures, and are accessible from their administrative dashboards. These logs are not directly exposed to the frontend interface.
 
 * **Rate Limiter Key Considerations:** The current rate limiting mechanism utilizes the client's `r.RemoteAddr` (IP address) as the primary key. For robust production deployments (e.g., behind a load balancer that may modify `X-Forwarded-For` headers), or to implement rate limiting on a per-user basis, it may be necessary to adapt this approach to leverage a unique user identifier derived from an authentication system.
+* **Cross-Origin Resource Sharing (CORS) Configuration:**
+The API incorporates CORS middleware (github.com/rs/cors) to manage cross-origin requests from web browsers. For development purposes, http://localhost:5500 is explicitly permitted as an allowed origin. In production environments, it is imperative to configure AllowedOrigins to exclusively include the precise URL(s) of your frontend application to maintain optimal security. The current configuration explicitly allows requests from:
+
+   * http://localhost:5500 (for local frontend development)
+
+   * The API is configured to allow GET, POST, and OPTIONS methods, and the Content-Type header, with credentials allowed. This setup ensures that your frontend application can communicate securely with the API across different origins.
 
 ## 9. Scope for Future Development
 
