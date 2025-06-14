@@ -122,7 +122,7 @@ func (h *LinkShortenerHandler) Redirect(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, "Short URL not found", http.StatusNotFound)
 		} else {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			fmt.Printf("Error retrieving long URL for slug '%s': %v\n", shortSlug, err)
+			fmt.Printf("Error retrieving long URL for Cshort '%s': %v\n", shortSlug, err)
 		}
 		return
 	}
