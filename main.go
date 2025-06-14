@@ -1,11 +1,11 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"crypto/tls"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
@@ -13,8 +13,8 @@ import (
 
 	"link-shortener/config"
 	"link-shortener/handler"
-	redisClient "link-shortener/redis"
 	"link-shortener/ratelimiter"
+	redisClient "link-shortener/redis"
 	"link-shortener/shortener"
 )
 
@@ -30,9 +30,9 @@ func main() {
 
 	// 2. Initialize Redis Client
 	redisNativeClient := redis.NewClient(&redis.Options{
-		Addr:     cfg.RedisAddr,
-		Password: cfg.RedisPassword,
-		DB:       cfg.RedisDB,
+		Addr:      cfg.RedisAddr,
+		Password:  cfg.RedisPassword,
+		DB:        cfg.RedisDB,
 		TLSConfig: tlsConfig,
 	})
 
@@ -69,17 +69,16 @@ func main() {
 		fmt.Fprintf(w, "OK")
 	}).Methods("GET")
 
-
 	// Configure CORS middleware
-	// For production, replace cors.AllowAll() with more specific origins and methods.
-	// Example: cors.New(cors.Options{
-	// 	AllowedOrigins: []string{"http://localhost:5500", "https://your-frontend-app.com"}, // Replace with your actual frontend origins
-	// 	AllowedMethods: []string{"GET", "POST", "OPTIONS"}, // Add all methods your API uses
-	// 	AllowedHeaders: []string{"Content-Type"}, // Add all headers your API expects
-	// 	AllowCredentials: true, // Set to true if you are using cookies/authentication
-	// }).Handler(r)
-	c := cors.AllowAll().Handler(r) // Allows all origins, methods, and headers (simplest for dev)
-
+	// Set AllowedOrigins to your specific frontend URLs.
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{
+			"https://cutlink-9ats.onrender.com", // Your specific Render frontend URL
+		},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"}, // Include all methods your API uses
+		AllowedHeaders:   []string{"Content-Type"},           // Include any headers your API expects (e.g., Authorization)
+		AllowCredentials: true,                               // Set to true if your frontend sends cookies or authentication headers
+	}).Handler(r)
 
 	// 6. Start the HTTP Server
 	port := os.Getenv("PORT")
