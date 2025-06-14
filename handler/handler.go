@@ -12,17 +12,18 @@ import (
 
 // ShortenRequest represents the JSON structure for a shorten request.
 type ShortenRequest struct {
-	LongURL      string `json:"long_url"`
-	Customcshort string `json:"custom_cshort,omitempty"`
+	LongURL    string `json:"long_url"`
+	CustomSlug string `json:"custom_slug,omitempty"`
 }
 
 // ShortenResponse represents the JSON structure for a shorten response.
 type ShortenResponse struct {
 	ShortURL       string `json:"short_url"`
-	LongURL        string `json:"long_url,omitempty"`        // Added LongURL
-	LimitRemaining int64  `json:"limit_remaining,omitempty"` // Added LimitRemaining
+	LongURL        string `json:"long_url,omitempty"`
+	LimitRemaining int64  `json:"limit_remaining,omitempty"`
 	Message        string `json:"message,omitempty"`
-	Error          string `json:"error,omitempty"`
+	Error          string `json:"error,omitempty"`            // Existing general error field
+	RateLimitError string `json:"rate_limit_error,omitempty"` // New field for specific rate limit error
 }
 
 // LinkShortenerHandler handles the URL shortening requests.
@@ -60,9 +61,10 @@ func (h *LinkShortenerHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 
 	if !allowed {
 		w.WriteHeader(http.StatusTooManyRequests)
+		// Modified response for rate limit error
 		json.NewEncoder(w).Encode(ShortenResponse{
-			Error:          fmt.Sprintf("Rate limit of %d exceeded: try agin after %s ", ratelimiter.MaxRequests, ratelimiter.RateLimitDuration),
-			LimitRemaining: remaining, // Include remaining limit in error response
+			RateLimitError: fmt.Sprintf("Rate limit of %d URLs exceeded: try again after %s", ratelimiter.MaxRequests, ratelimiter.RateLimitDuration),
+			LimitRemaining: remaining,
 		})
 		return
 	}
@@ -80,47 +82,47 @@ func (h *LinkShortenerHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortcshort, err := h.shortener.ShortenURL(req.LongURL, req.Customcshort)
+	shortSlug, err := h.shortener.ShortenURL(req.LongURL, req.CustomSlug)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if strings.Contains(err.Error(), "invalid or non-HTTPS URL") || strings.Contains(err.Error(), "custom cshort") {
+		if strings.Contains(err.Error(), "invalid or non-HTTPS URL") || strings.Contains(err.Error(), "custom slug") {
 			statusCode = http.StatusBadRequest
 		}
 		w.WriteHeader(statusCode)
 		json.NewEncoder(w).Encode(ShortenResponse{
 			Error:          err.Error(),
-			LimitRemaining: remaining, // Include remaining limit in error response
+			LimitRemaining: remaining, // Include remaining limit in other error responses too
 		})
 		return
 	}
 
-	fullShortURL := fmt.Sprintf("/s/%s", shortcshort)
+	fullShortURL := fmt.Sprintf("/s/%s", shortSlug)
 
 	json.NewEncoder(w).Encode(ShortenResponse{
 		ShortURL:       fullShortURL,
-		LongURL:        req.LongURL, // Return the original long URL
-		LimitRemaining: remaining,   // Return the calculated remaining limit
+		LongURL:        req.LongURL,
+		LimitRemaining: remaining,
 		Message:        "URL shortened successfully",
 	})
 }
 
 // Redirect handles the GET request to redirect from a short URL to the original long URL.
 func (h *LinkShortenerHandler) Redirect(w http.ResponseWriter, r *http.Request) {
-	// Extract the short cshort from the URL path.
+	// Extract the short slug from the URL path.
 	parts := strings.Split(r.URL.Path, "/")
 	if len(parts) < 3 || parts[2] == "" {
 		http.Error(w, "Short URL not found", http.StatusNotFound)
 		return
 	}
-	shortcshort := parts[2]
+	shortSlug := parts[2]
 
-	longURL, err := h.shortener.GetLongURL(shortcshort)
+	longURL, err := h.shortener.GetLongURL(shortSlug)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			http.Error(w, "Short URL not found", http.StatusNotFound)
 		} else {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			fmt.Printf("Error retrieving long URL for cshort '%s': %v\n", shortcshort, err)
+			fmt.Printf("Error retrieving long URL for slug '%s': %v\n", shortSlug, err)
 		}
 		return
 	}
