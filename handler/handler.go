@@ -12,8 +12,8 @@ import (
 
 // ShortenRequest represents the JSON structure for a shorten request.
 type ShortenRequest struct {
-	LongURL     string `json:"long_url"`
-	Customshort string `json:"custom_short,omitempty"`
+	LongURL    string `json:"long_url"`
+	CustomSlug string `json:"custom_slug,omitempty"`
 }
 
 // ShortenResponse represents the JSON structure for a shorten response.
@@ -82,10 +82,10 @@ func (h *LinkShortenerHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortCshort, err := h.shortener.ShortenURL(req.LongURL, req.Customshort)
+	shortSlug, err := h.shortener.ShortenURL(req.LongURL, req.CustomSlug)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if strings.Contains(err.Error(), "invalid or non-HTTPS URL") || strings.Contains(err.Error(), "custom short") {
+		if strings.Contains(err.Error(), "invalid or non-HTTPS URL") || strings.Contains(err.Error(), "custom slug") {
 			statusCode = http.StatusBadRequest
 		}
 		w.WriteHeader(statusCode)
@@ -96,7 +96,7 @@ func (h *LinkShortenerHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fullShortURL := fmt.Sprintf("/s/%s", shortCshort)
+	fullShortURL := fmt.Sprintf("/s/%s", shortSlug)
 
 	json.NewEncoder(w).Encode(ShortenResponse{
 		ShortURL:       fullShortURL,
@@ -108,21 +108,21 @@ func (h *LinkShortenerHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 
 // Redirect handles the GET request to redirect from a short URL to the original long URL.
 func (h *LinkShortenerHandler) Redirect(w http.ResponseWriter, r *http.Request) {
-	// Extract the short short from the URL path.
+	// Extract the short slug from the URL path.
 	parts := strings.Split(r.URL.Path, "/")
 	if len(parts) < 3 || parts[2] == "" {
 		http.Error(w, "Short URL not found", http.StatusNotFound)
 		return
 	}
-	shortCshort := parts[2]
+	shortSlug := parts[2]
 
-	longURL, err := h.shortener.GetLongURL(shortCshort)
+	longURL, err := h.shortener.GetLongURL(shortSlug)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			http.Error(w, "Short URL not found", http.StatusNotFound)
 		} else {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			fmt.Printf("Error retrieving long URL for Cshort '%s': %v\n", shortCshort, err)
+			fmt.Printf("Error retrieving long URL for slug '%s': %v\n", shortSlug, err)
 		}
 		return
 	}
