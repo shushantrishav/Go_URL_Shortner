@@ -12,17 +12,17 @@ import (
 
 // ShortenRequest represents the JSON structure for a shorten request.
 type ShortenRequest struct {
-	LongURL    string `json:"long_url"`
+	LongURL      string `json:"long_url"`
 	Customcshort string `json:"custom_cshort,omitempty"`
 }
 
 // ShortenResponse represents the JSON structure for a shorten response.
 type ShortenResponse struct {
-	ShortURL      string `json:"short_url"`
-	LongURL       string `json:"long_url,omitempty"`      // Added LongURL
+	ShortURL       string `json:"short_url"`
+	LongURL        string `json:"long_url,omitempty"`        // Added LongURL
 	LimitRemaining int64  `json:"limit_remaining,omitempty"` // Added LimitRemaining
-	Message       string `json:"message,omitempty"`
-	Error         string `json:"error,omitempty"`
+	Message        string `json:"message,omitempty"`
+	Error          string `json:"error,omitempty"`
 }
 
 // LinkShortenerHandler handles the URL shortening requests.
@@ -61,7 +61,7 @@ func (h *LinkShortenerHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 	if !allowed {
 		w.WriteHeader(http.StatusTooManyRequests)
 		json.NewEncoder(w).Encode(ShortenResponse{
-			Error:          fmt.Sprintf("Rate limit exceeded: %d URLs per %s", ratelimiter.MaxRequests, ratelimiter.RateLimitDuration),
+			Error:          fmt.Sprintf("Rate limit of %d exceeded: try agin after %s ", ratelimiter.MaxRequests, ratelimiter.RateLimitDuration),
 			LimitRemaining: remaining, // Include remaining limit in error response
 		})
 		return
@@ -98,8 +98,8 @@ func (h *LinkShortenerHandler) Shorten(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(ShortenResponse{
 		ShortURL:       fullShortURL,
-		LongURL:        req.LongURL,       // Return the original long URL
-		LimitRemaining: remaining,         // Return the calculated remaining limit
+		LongURL:        req.LongURL, // Return the original long URL
+		LimitRemaining: remaining,   // Return the calculated remaining limit
 		Message:        "URL shortened successfully",
 	})
 }
