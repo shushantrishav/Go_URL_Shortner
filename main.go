@@ -75,6 +75,7 @@ func main() {
 		AllowedOrigins: []string{
 			// "http://localhost:5500 ", //local server
 			"https://cutlink-9ats.onrender.com", // Render frontend URL
+"https://web.cutlink.in",
 		},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"}, // Include all methods your API uses
 		AllowedHeaders:   []string{"Content-Type"},           // Include any headers your API expects (e.g., Authorization)
