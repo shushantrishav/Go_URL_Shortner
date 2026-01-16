@@ -13,7 +13,7 @@ import (
 
 const (
     ShortURLLength = 6
-    URLExpiration = 30 * 24 * time.Hour // 30 days ttl
+    URLExpiration  = 30 * 24 * time.Hour // 30 days ttl
     LongURLPrefix  = "long:"
     ShortURLPrefix = "short:"
 )
@@ -47,18 +47,21 @@ local slug = ARGV[2]
 local ttl = ARGV[3]
 local is_custom = ARGV[4] == "1"  
 
+
 local existing_slug = redis.call('GET', url_key)
 if existing_slug then
-    redis.call('EXPIRE', url_key, ttl, 'GT')
-    redis.call('EXPIRE', 'short:' .. existing_slug, ttl, 'GT')
+    redis.call('EXPIRE', url_key, ttl)
+    redis.call('EXPIRE', 'short:' .. existing_slug, ttl)
     return { 'EXISTS', existing_slug }
 end
+
 
 local set_result = redis.call('SET', slug_key, long_url, 'NX', 'EX', ttl)
 if set_result then
     redis.call('SET', url_key, slug, 'EX', ttl)
     return { 'CREATED', slug }
 end
+
 
 if is_custom then
     return { 'SLUG_TAKEN', '' }
@@ -73,6 +76,7 @@ func (s *Shortener) ShortenURL(longURL, customSlug string) (string, error) {
     }
 
     urlKey := LongURLPrefix + longURL
+    ttlSeconds := fmt.Sprintf("%d", int64(URLExpiration.Seconds()))
 
     for {
         slug := customSlug
@@ -88,7 +92,9 @@ func (s *Shortener) ShortenURL(longURL, customSlug string) (string, error) {
 
         slugKey := ShortURLPrefix + slug
 
-        result, err := s.redisClient.Client().Eval(s.redisClient.Context(), atomicShortenScript, []string{urlKey, slugKey}, longURL, slug, URLExpiration, isCustom).Result()
+        result, err := s.redisClient.Client().Eval(s.redisClient.Context(), atomicShortenScript, 
+            []string{urlKey, slugKey}, 
+            longURL, slug, ttlSeconds, fmt.Sprintf("%t", isCustom)).Result()
         if err != nil {
             return "", fmt.Errorf("Redis script execution failed: %w", err)
         }
