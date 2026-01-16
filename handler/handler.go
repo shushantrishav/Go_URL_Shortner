@@ -127,5 +127,5 @@ func (h *LinkShortenerHandler) Redirect(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	http.Redirect(w, r, longURL, http.StatusMovedPermanently)
+	http.Redirect(w, r, longURL, http.StatusFound)
 }

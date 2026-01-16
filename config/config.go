@@ -57,7 +57,7 @@ func getEnvAsSlice(key string, defaultValue string) []string {
 
 // LoadConfig reads configuration from environment variables.
 func LoadConfig() *Config {
-	redisAddr := getEnv("REDIS_ADDR", "")
+	redisAddr := getEnv("REDIS_ADDR", "localhost:6379")
 	if redisAddr == "" {
 		log.Fatal("REDIS_ADDR environment variable not set")
 	}
@@ -72,8 +72,8 @@ func LoadConfig() *Config {
 	tlsKeyPath := getEnv("TLS_KEY_PATH", "")
 
 	allowedOrigins := getEnvAsSlice(
-		"AllowedOrigins", // Matches your .env key
-		"", // No default provided here, as you expect it from .env or for it to be empty
+		"ALLOWED_ORIGINS", // Matches .env key
+		"",
 	)
 
 	return &Config{
